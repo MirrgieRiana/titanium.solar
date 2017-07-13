@@ -1,7 +1,8 @@
-backup/
-*.lnk
 */.settings/
 */.gradle/
+*/.classpath
 */bin/
 */build/
-*/.classpath
+
+*.lnk
+*/backup/

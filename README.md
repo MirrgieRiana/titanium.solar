@@ -1,10 +1,10 @@
-# mirrg.template
+# titanium.solar
 
-- Repo: `https://raw.githubusercontent.com/MirrgieRiana/mirrg.template/master/maven`
+- Repo: `https://raw.githubusercontent.com/MirrgieRiana/titanium.solar/master/maven`
 - Artifacts
-  - `mirrg:mirrg.template:+`
+  - `mirrg:titanium.solar:+`
 
-## mirrg.template
+## titanium.solar
 
 ### 説明
 
@@ -12,7 +12,7 @@
 
 ### エントリーポイント
 
-- `mirrg.template.Template`
+- `titanium.solar.Main`
 
 ### 機能
 
