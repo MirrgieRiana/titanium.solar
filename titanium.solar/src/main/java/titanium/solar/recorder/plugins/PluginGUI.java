@@ -14,7 +14,6 @@ import titanium.solar.recorder.core.Buffer;
 import titanium.solar.recorder.core.Chunk;
 import titanium.solar.recorder.core.EventRecoder;
 import titanium.solar.recorder.core.PluginBase;
-import titanium.solar.recorder.core.Recorder;
 
 public class PluginGUI extends PluginBase
 {
@@ -25,9 +24,11 @@ public class PluginGUI extends PluginBase
 	private Buffer buffer = new Buffer(1);
 	private Chunk entry;
 
-	public PluginGUI(Recorder recorder, double zoom)
+	@Override
+	public void apply()
 	{
-		super(recorder);
+		double zoom = properties.get("zoom").getDouble().get();
+
 		recorder.event().register(EventRecoder.Start.class, e -> {
 			frame = new JFrame();
 			frame.setLayout(new CardLayout());
@@ -71,6 +72,12 @@ public class PluginGUI extends PluginBase
 		recorder.event().register(EventRecoder.Destroy.class, e -> {
 			SwingUtilities.invokeLater(() -> frame.dispose());
 		});
+	}
+
+	@Override
+	public String getName()
+	{
+		return "gui";
 	}
 
 }

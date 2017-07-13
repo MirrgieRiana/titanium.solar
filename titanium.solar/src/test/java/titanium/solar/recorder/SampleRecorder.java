@@ -1,4 +1,4 @@
-package titanium.solar;
+package titanium.solar.recorder;
 
 import titanium.solar.recorder.Main;
 

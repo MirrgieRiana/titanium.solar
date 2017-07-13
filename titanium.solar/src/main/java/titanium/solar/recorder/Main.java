@@ -6,59 +6,33 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import mirrg.lithium.properties.HPropertiesParser;
-import mirrg.lithium.properties.Properties;
+import mirrg.lithium.properties.IProperties;
+import mirrg.lithium.properties.PropertiesMultipleInheritable;
+import titanium.solar.recorder.core.IPlugin;
 import titanium.solar.recorder.core.Recorder;
-import titanium.solar.recorder.plugins.PluginAttributeLogs;
-import titanium.solar.recorder.plugins.PluginAttributeNanoTime;
-import titanium.solar.recorder.plugins.PluginGUI;
-import titanium.solar.recorder.plugins.PluginPrintStringGraph;
-import titanium.solar.recorder.plugins.PluginSaveArchive;
 
 public class Main
 {
 
 	public static void main(String[] args) throws Exception
 	{
-		Properties properties = parse("default.recorder.properties", args);
+		IProperties properties = parse("default.recorder.properties", args);
 
 		// レコーダーインスタンス生成
 		Recorder recorder = new Recorder(
-			properties.getInteger("secondsPerEntry").get(),
-			properties.getInteger("samplesPerSecond").get(),
-			properties.getInteger("bitsPerSample").get());
+			properties.get("secondsPerEntry").getInteger().get(),
+			properties.get("samplesPerSecond").getInteger().get(),
+			properties.get("bitsPerSample").getInteger().get());
 		{
 			// プラグイン設定
-
-			if (properties.getBoolean("plugins.gui").get()) {
-				new PluginGUI(recorder,
-					properties.getDouble("plugins.gui.zoom").get());
+			String[] pluginClasses = properties.get("plugins").getString().get().split(";");
+			for (String pluginClass : pluginClasses) {
+				IPlugin plugin = (IPlugin) Class.forName(pluginClass).newInstance();
+				if (properties.get("plugins." + plugin.getName()).getBoolean().get()) {
+					plugin.initialize(recorder, key -> properties.getMethod("plugins." + plugin.getName() + "." + key));
+					plugin.apply();
+				}
 			}
-
-			if (properties.getBoolean("plugins.printStringGraph").get()) {
-				new PluginPrintStringGraph(recorder,
-					properties.getInteger("plugins.printStringGraph.length").get(),
-					properties.getDouble("plugins.printStringGraph.zoom").get());
-			}
-
-			if (properties.getBoolean("plugins.attributeLogs").get()) {
-				new PluginAttributeLogs(recorder);
-			}
-
-			if (properties.getBoolean("plugins.attributeNanoTime").get()) {
-				new PluginAttributeNanoTime(recorder);
-			}
-
-			if (properties.getBoolean("plugins.saveArchive").get()) {
-				new PluginSaveArchive(recorder,
-					properties.getString("plugins.saveArchive.patternDir").get(),
-					properties.getString("plugins.saveArchive.patternZip").get(),
-					properties.getString("plugins.saveArchive.patternChunk").get(),
-					properties.getInteger("plugins.saveArchive.imageWidth").get(),
-					properties.getInteger("plugins.saveArchive.imageHeight").get(),
-					properties.getInteger("plugins.saveArchive.stringGraphLength").get(),
-					properties.getDouble("plugins.saveArchive.stringGraphZoom").get());
-			}
-
 		}
 
 		// レコーダー準備
@@ -73,11 +47,11 @@ public class Main
 		System.exit(0);
 	}
 
-	private static Properties parse(String defaultPropertyFileName, String... args) throws Exception
+	private static IProperties parse(String defaultPropertyFileName, String... args) throws Exception
 	{
 		boolean useDefaultPropertyFile = true;
 
-		Properties properties = new Properties();
+		PropertiesMultipleInheritable properties = new PropertiesMultipleInheritable();
 		{
 			for (String arg : args) {
 

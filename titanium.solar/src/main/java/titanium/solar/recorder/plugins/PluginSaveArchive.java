@@ -18,7 +18,6 @@ import titanium.solar.recorder.core.Chunk;
 import titanium.solar.recorder.core.ChunkUtil;
 import titanium.solar.recorder.core.EventRecoder;
 import titanium.solar.recorder.core.PluginBase;
-import titanium.solar.recorder.core.Recorder;
 
 public class PluginSaveArchive extends PluginBase
 {
@@ -32,16 +31,17 @@ public class PluginSaveArchive extends PluginBase
 	private PrintStream stringGraphPrintStream = null;
 	private int indexInZip = 0;
 
-	public PluginSaveArchive(Recorder recorder,
-		String patternDir,
-		String patternZip,
-		String patternChunk,
-		int imageWidth,
-		int imageHeight,
-		int stringGraphLength,
-		double stringGraphZoom)
+	@Override
+	public void apply()
 	{
-		super(recorder);
+		String patternDir = properties.get("patternDir").getString().get();
+		String patternZip = properties.get("patternZip").getString().get();
+		String patternChunk = properties.get("patternChunk").getString().get();
+		int imageWidth = properties.get("imageWidth").getInteger().get();
+		int imageHeight = properties.get("imageHeight").getInteger().get();
+		int stringGraphLength = properties.get("stringGraphLength").getInteger().get();
+		double stringGraphZoom = properties.get("stringGraphZoom").getDouble().get();
+
 		image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
 		formatterDir = DateTimeFormatter.ofPattern(patternDir);
 		formatterZip = DateTimeFormatter.ofPattern(patternZip);
@@ -74,6 +74,12 @@ public class PluginSaveArchive extends PluginBase
 		recorder.event().register(EventRecoder.Destroy.class, e -> {
 			close();
 		});
+	}
+
+	@Override
+	public String getName()
+	{
+		return "saveArchive";
 	}
 
 	//

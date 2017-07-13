@@ -2,7 +2,6 @@ package titanium.solar.recorder.plugins;
 
 import titanium.solar.recorder.core.EventRecoder;
 import titanium.solar.recorder.core.PluginBase;
-import titanium.solar.recorder.core.Recorder;
 
 public class PluginAttributeNanoTime extends PluginBase
 {
@@ -11,9 +10,9 @@ public class PluginAttributeNanoTime extends PluginBase
 	private long lastNanoTime;
 	private long samples;
 
-	public PluginAttributeNanoTime(Recorder recorder)
+	@Override
+	public void apply()
 	{
-		super(recorder);
 		recorder.event().register(EventRecoder.Start.class, e -> {
 			startNanoTime = System.nanoTime();
 			lastNanoTime = System.nanoTime();
@@ -32,6 +31,12 @@ public class PluginAttributeNanoTime extends PluginBase
 
 			lastNanoTime = nowNanoTime;
 		});
+	}
+
+	@Override
+	public String getName()
+	{
+		return "attributeNanoTime";
 	}
 
 }
