@@ -22,6 +22,8 @@ import titanium.solar.recorder.core.PluginBase;
 public class PluginSaveArchive extends PluginBase
 {
 
+	private File dir;
+
 	private BufferedImage image;
 	private DateTimeFormatter formatterDir;
 	private DateTimeFormatter formatterZip;
@@ -34,6 +36,7 @@ public class PluginSaveArchive extends PluginBase
 	@Override
 	public void apply()
 	{
+		dir = new File(properties.get("dir").getString().get());
 		String patternDir = properties.get("patternDir").getString().get();
 		String patternZip = properties.get("patternZip").getString().get();
 		String patternChunk = properties.get("patternChunk").getString().get();
@@ -47,6 +50,9 @@ public class PluginSaveArchive extends PluginBase
 		formatterZip = DateTimeFormatter.ofPattern(patternZip);
 		formatterChunk = DateTimeFormatter.ofPattern(patternChunk);
 
+		recorder.event().register(EventRecoder.Ready.class, e -> {
+			System.err.println("OutputDir:" + dir);
+		});
 		recorder.event().registerThrowable(EventRecoder.ProcessChunk.Consume.class, e -> {
 
 			// prepare stream
@@ -97,9 +103,9 @@ public class PluginSaveArchive extends PluginBase
 			close();
 
 			// start
-			new File(archiveNameBase).getParentFile().mkdirs();
-			zipOutputStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(archiveNameBase + ".zip"))));
-			stringGraphPrintStream = new PrintStream(new FileOutputStream(new File(archiveNameBase + ".txt")));
+			new File(dir, archiveNameBase).getParentFile().mkdirs();
+			zipOutputStream = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(dir, archiveNameBase + ".zip"))));
+			stringGraphPrintStream = new PrintStream(new FileOutputStream(new File(dir, archiveNameBase + ".txt")));
 
 			// on change archive
 			indexInZip = 0;

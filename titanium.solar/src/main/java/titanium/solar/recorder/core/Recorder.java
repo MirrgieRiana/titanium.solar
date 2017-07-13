@@ -50,17 +50,18 @@ public class Recorder
 	public void ready() throws Exception
 	{
 		targetDataLine.open(audioFormat);
-		event().post(new EventRecoder.Ready());
-	}
 
-	public void start()
-	{
 		System.err.println(String.format("ChunkSize:%sseconds;Sampling:%sHz %sbit %schannels",
 			secondsPerChunk,
 			samplesPerSecond,
 			bitsPerSample,
 			channels));
 
+		event().post(new EventRecoder.Ready());
+	}
+
+	public void start()
+	{
 		targetDataLine.start();
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
