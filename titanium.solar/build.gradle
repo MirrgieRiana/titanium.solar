@@ -14,7 +14,7 @@ jar {
 	manifest {
 		attributes 'Implementation-Title': 'Gradle Quickstart'
 		attributes 'Implementation-Version': version
-		attributes 'Main-Class': 'titanium.solar.Main'
+		attributes 'Main-Class': 'titanium.solar.recorder.Main'
 	}
 }
 
