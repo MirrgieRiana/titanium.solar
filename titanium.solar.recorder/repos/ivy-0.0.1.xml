@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
-  <info organisation="titanium" module="titanium.solar" revision="0.0.1" status="integration" publication="20170713230832">
+  <info organisation="titanium.solar" module="titanium.solar.recorder" revision="0.0.1" status="integration" publication="20170717083808">
     <description/>
   </info>
   <configurations>
@@ -12,15 +12,17 @@
     <conf name="testRuntime" visibility="private" description="Runtime classpath for source set 'test'." extends="runtime,testCompile"/>
   </configurations>
   <publications>
-    <artifact name="titanium.solar" type="jar" ext="jar" conf="archives,runtime"/>
-    <artifact name="titanium.solar" type="jar" ext="jar" conf="archives" m:classifier="sources"/>
-    <artifact name="titanium.solar" type="jar" ext="jar" conf="archives" m:classifier="javadoc"/>
-    <artifact name="titanium.solar" type="zip" ext="zip" conf="archives" m:classifier="universal"/>
+    <artifact name="titanium.solar.recorder" type="jar" ext="jar" conf="archives,runtime"/>
+    <artifact name="titanium.solar.recorder" type="jar" ext="jar" conf="archives" m:classifier="sources"/>
+    <artifact name="titanium.solar.recorder" type="jar" ext="jar" conf="archives" m:classifier="javadoc"/>
+    <artifact name="titanium.solar.recorder" type="zip" ext="zip" conf="archives" m:classifier="universal"/>
   </publications>
   <dependencies>
-    <dependency org="mirrg.lithium" name="mirrg.lithium.properties" rev="3.0.0+" conf="compile-&gt;default"/>
+    <dependency org="mirrg.lithium" name="mirrg.lithium.properties" rev="4.0.0+" conf="compile-&gt;default"/>
     <dependency org="mirrg.lithium" name="mirrg.lithium.struct" rev="2.0.0+" conf="compile-&gt;default"/>
     <dependency org="mirrg.lithium" name="mirrg.lithium.event" rev="2.0.0+" conf="compile-&gt;default"/>
+    <dependency org="org.apache.commons" name="commons-math3" rev="3.6.1" conf="compile-&gt;default"/>
+    <dependency org="org.apache.commons" name="commons-lang3" rev="3.6" conf="compile-&gt;default"/>
     <dependency org="junit" name="junit" rev="4.+" conf="testCompile-&gt;default"/>
   </dependencies>
 </ivy-module>
