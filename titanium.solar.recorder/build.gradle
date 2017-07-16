@@ -43,6 +43,7 @@ task universalZip(type: Zip, dependsOn:latestJar) {
 	//	from file("dirname")
 	//}
 	from file("default.recorder.properties")
+	from file("analyzer.recorder.properties")
 
 }
 
