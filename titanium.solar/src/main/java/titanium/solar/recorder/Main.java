@@ -20,7 +20,7 @@ public class Main
 
 		// レコーダーインスタンス生成
 		Recorder recorder = new Recorder(
-			properties.get("secondsPerEntry").getInteger().get(),
+			properties.get("secondsPerEntry").getDouble().get(),
 			properties.get("samplesPerSecond").getInteger().get(),
 			properties.get("bitsPerSample").getInteger().get());
 		{

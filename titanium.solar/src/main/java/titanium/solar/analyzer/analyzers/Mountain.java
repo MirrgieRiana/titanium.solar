@@ -1,4 +1,4 @@
-package titanium.solar.analyzer.channel;
+package titanium.solar.analyzer.analyzers;
 
 public class Mountain
 {

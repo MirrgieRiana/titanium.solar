@@ -1,17 +1,13 @@
-package titanium.solar.analyzer;
+package titanium.solar.analyzer.analyzers;
 
 import java.util.ArrayList;
+
+import titanium.solar.analyzer.IAnalyzer;
 
 public class AnalyzerConcatenate implements IAnalyzer
 {
 
 	private ArrayList<IAnalyzer> analyzers = new ArrayList<>();
-
-	public AnalyzerConcatenate add(IAnalyzer analyzer)
-	{
-		analyzers.add(analyzer);
-		return this;
-	}
 
 	@Override
 	public void accept(double[] buffer, int length)
@@ -19,6 +15,12 @@ public class AnalyzerConcatenate implements IAnalyzer
 		for (IAnalyzer analyzer : analyzers) {
 			analyzer.accept(buffer, length);
 		}
+	}
+
+	public AnalyzerConcatenate add(IAnalyzer analyzer)
+	{
+		analyzers.add(analyzer);
+		return this;
 	}
 
 }

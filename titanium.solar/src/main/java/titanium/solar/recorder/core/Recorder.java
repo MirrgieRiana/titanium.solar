@@ -9,7 +9,7 @@ import mirrg.lithium.event.EventManager;
 public class Recorder
 {
 
-	public final int secondsPerChunk;
+	public final double secondsPerChunk;
 	public final int samplesPerSecond;
 	public final int bitsPerSample;
 	public final int channels;
@@ -23,7 +23,7 @@ public class Recorder
 	private Buffers buffers;
 	private ChunkStorage chunkStorage;
 
-	public Recorder(int secondsPerChunk, int samplesPerSecond, int bitsPerSample) throws Exception
+	public Recorder(double secondsPerChunk, int samplesPerSecond, int bitsPerSample) throws Exception
 	{
 		this.secondsPerChunk = secondsPerChunk;
 		this.samplesPerSecond = samplesPerSecond;
@@ -32,7 +32,7 @@ public class Recorder
 		samplesPerFrame = 1;
 
 		bytesPerSample = channels * (bitsPerSample / 8);
-		bytesPerChunk = bytesPerSample * samplesPerSecond * secondsPerChunk;
+		bytesPerChunk = (int) (bytesPerSample * samplesPerSecond * secondsPerChunk);
 
 		audioFormat = new AudioFormat(
 			AudioFormat.Encoding.PCM_SIGNED,
@@ -84,7 +84,8 @@ public class Recorder
 					event().post(new EventRecoder.ProcessChunk.Consume(c, attributes));
 
 					// 表示
-					System.out.println("[Entry] " + attributes.toString());
+					String string = attributes.toString();
+					if (!string.isEmpty()) System.out.println("[Entry] " + string);
 					if (c.getStatistics().noiz > 1000) System.err.println("Abnormal data was observed!");
 
 					event().post(new EventRecoder.ProcessChunk.Post(c));

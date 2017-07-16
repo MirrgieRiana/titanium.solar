@@ -1,5 +1,10 @@
-package titanium.solar.analyzer;
+package titanium.solar.analyzer.analyzers;
 
+import titanium.solar.analyzer.IAnalyzer;
+
+/**
+ * 相関関数
+ */
 public class AnalyzerCorrelation implements IAnalyzer
 {
 

@@ -115,27 +115,33 @@ public class PluginSaveArchive extends PluginBase
 		lastArchiveNameBase = archiveNameBase;
 	}
 
-	private void close()
+	private synchronized void close()
 	{
-		if (zipOutputStream != null) {
-			try {
-				zipOutputStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			stringGraphPrintStream.close();
-			System.err.println("Closed Zip");
+		if (zipOutputStream == null) return;
+
+		try {
+			zipOutputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		zipOutputStream = null;
+
+		stringGraphPrintStream.close();
+		System.err.println("Closed Zip");
 	}
 
-	private void saveData(Chunk entry, String entryNameBase) throws IOException
+	private synchronized void saveData(Chunk entry, String entryNameBase) throws IOException
 	{
+		if (zipOutputStream == null) return;
+
 		zipOutputStream.putNextEntry(new ZipEntry(entryNameBase));
 		zipOutputStream.write(entry.buffer.array, 0, entry.length);
 	}
 
-	private void saveImage(Chunk entry, String entryNameBase) throws IOException
+	private synchronized void saveImage(Chunk entry, String entryNameBase) throws IOException
 	{
+		if (zipOutputStream == null) return;
+
 		zipOutputStream.putNextEntry(new ZipEntry(entryNameBase));
 		entry.paint(image, 1);
 		ImageIO.write(image, "png", zipOutputStream);

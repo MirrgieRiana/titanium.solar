@@ -1,4 +1,4 @@
-package titanium.solar.analyzer;
+package titanium.solar.analyzer.old;
 
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -30,7 +30,14 @@ import javax.swing.JScrollPane;
 import javax.swing.WindowConstants;
 
 import mirrg.lithium.struct.Tuple;
-import titanium.solar.analyzer.channel.ChainManager;
+import titanium.solar.analyzer.IAnalyzer;
+import titanium.solar.analyzer.Waveform1;
+import titanium.solar.analyzer.analyzers.AnalyzerConcatenate;
+import titanium.solar.analyzer.analyzers.AnalyzerCorrelation;
+import titanium.solar.analyzer.analyzers.AnalyzerExtractMountain;
+import titanium.solar.analyzer.analyzers.AnalyzerMul;
+import titanium.solar.analyzer.analyzers.AnalyzerQOM;
+import titanium.solar.analyzer.old.channel.ChainManager;
 
 public class MainAnalyzer
 {
@@ -55,7 +62,7 @@ public class MainAnalyzer
 
 		System.err.println("0");
 		analyze(new AnalyzerConcatenate()
-			.add(new AnalyzerCorrelation(SampleWave.getDefault()))
+			.add(new AnalyzerCorrelation(Waveform1.get()))
 			.add(new AnalyzerMul(0.1)),
 			Pattern.compile("^([^\\.]+)\\.dat$"),
 			".2.dat",
@@ -63,7 +70,7 @@ public class MainAnalyzer
 			false);
 		System.err.println("1");
 		analyze(new AnalyzerConcatenate()
-			.add(new AnalyzerYA())
+			.add(new AnalyzerQOM())
 			.add(new AnalyzerMul(0.01)),
 			Pattern.compile("^([^\\.]+)\\.2\\.dat$"),
 			".3.dat",
@@ -72,7 +79,8 @@ public class MainAnalyzer
 		System.err.println("2");
 		ChainManager chainManager = new ChainManager(3, 90);
 		analyze(new AnalyzerConcatenate()
-			.add(new AnalyzerMountain(7, 30, chainManager.getListener()))
+			.add(new AnalyzerExtractMountain(7, 30, 100)
+				.addMountainListener(chainManager.getListener()))
 			.add(new AnalyzerMul(1)),
 			Pattern.compile("^([^\\.]+)\\.3\\.dat$"),
 			".4.dat",
@@ -206,7 +214,7 @@ public class MainAnalyzer
 	{
 		File dir = new File("C:\\amyf\\jesqenvina\\xa1\\kenkyuu\\data\\honzon\\20170530-09");
 
-		IAnalyzer analyzer = new AnalyzerCorrelation(SampleWave.getDefault());
+		IAnalyzer analyzer = new AnalyzerCorrelation(Waveform1.get());
 		Stream.of(dir.listFiles())
 			.sorted((a, b) -> a.getAbsolutePath().compareTo(b.getAbsolutePath()))
 			.forEach(f -> {

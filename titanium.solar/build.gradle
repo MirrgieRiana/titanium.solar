@@ -77,6 +77,11 @@ dependencies {
 	compile group: 'mirrg.lithium', name: 'mirrg.lithium.properties', version: '4.0.0+'
 	compile group: 'mirrg.lithium', name: 'mirrg.lithium.struct', version: '2.0.0+'
 	compile group: 'mirrg.lithium', name: 'mirrg.lithium.event', version: '2.0.0+'
+
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
 }
 
 uploadArchives {

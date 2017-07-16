@@ -1,4 +1,4 @@
-package titanium.solar.analyzer;
+package titanium.solar.analyzer.old;
 
 public class AnalyzerMul2
 {

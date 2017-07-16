@@ -2,10 +2,10 @@ package titanium.solar.analyzer;
 
 import java.util.stream.DoubleStream;
 
-public class SampleWave
+public class Waveform1
 {
 
-	private static double[] DEFAULT = {
+	private static double[] array = {
 		-3,
 		-4,
 		1,
@@ -135,10 +135,10 @@ public class SampleWave
 				*/
 	};
 
-	public static double[] getDefault()
+	public static double[] get()
 	{
-		double average = DoubleStream.of(DEFAULT).average().getAsDouble();
-		return DoubleStream.of(DEFAULT).map(d -> d - average).toArray();
+		double average = DoubleStream.of(array).average().getAsDouble();
+		return DoubleStream.of(array).map(d -> d - average).toArray();
 	}
 
 }

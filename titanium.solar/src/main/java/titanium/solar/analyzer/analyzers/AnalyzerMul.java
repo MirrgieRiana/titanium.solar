@@ -1,4 +1,6 @@
-package titanium.solar.analyzer;
+package titanium.solar.analyzer.analyzers;
+
+import titanium.solar.analyzer.IAnalyzer;
 
 public class AnalyzerMul implements IAnalyzer
 {
@@ -14,7 +16,7 @@ public class AnalyzerMul implements IAnalyzer
 	public void accept(double[] buffer, int length)
 	{
 		for (int i = 0; i < length; i++) {
-			buffer[i] = buffer[i] * a;
+			buffer[i] *= a;
 		}
 	}
 
