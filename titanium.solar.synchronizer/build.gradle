@@ -18,12 +18,12 @@ jar {
 	}
 }
 
-//task latestJar(type: Copy, dependsOn:jar) {
-//    from jar.archivePath
-//    into jar.destinationDir
-//    rename project.archivesBaseName + "-" + project.version + ".jar", project.archivesBaseName + ".jar"
-//    latestJar.metaClass.archivePath = "" + jar.destinationDir + "/" + project.archivesBaseName + ".jar"
-//}
+task latestJar(type: Copy, dependsOn:jar) {
+    from jar.archivePath
+    into jar.destinationDir
+    rename project.archivesBaseName + "-" + project.version + ".jar", project.archivesBaseName + ".jar"
+    latestJar.metaClass.archivePath = "" + jar.destinationDir + "/" + project.archivesBaseName + ".jar"
+}
 
 task sourcesJar(type: Jar, dependsOn:classes) {
 	classifier = 'sources'
@@ -35,16 +35,16 @@ task javadocJar(type: Jar, dependsOn:javadoc) {
 	from javadoc.destinationDir
 }
 
-//task universalZip(type: Zip, dependsOn:latestJar) {
-//	classifier = 'universal'
-//	from latestJar.archivePath
+task universalZip(type: Zip, dependsOn:latestJar) {
+	classifier = 'universal'
+	from latestJar.archivePath
 
-//	into ("dirname") {
-//		from file("dirname")
-//	}
-//	from file("filename")
+	//into ("dirname") {
+	//	from file("dirname")
+	//}
+	from file("default.synchronizer.properties")
 
-//}
+}
 
 javadoc {
 	options.charSet = 'UTF-8'
@@ -54,7 +54,7 @@ javadoc {
 artifacts {
 	archives sourcesJar
 	archives javadocJar
-	//archives universalZip
+	archives universalZip
 }
 
 repositories {
