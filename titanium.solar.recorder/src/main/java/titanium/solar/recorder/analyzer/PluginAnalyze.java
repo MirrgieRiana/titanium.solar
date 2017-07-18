@@ -21,6 +21,7 @@ public class PluginAnalyze extends PluginBase
 	@Override
 	public void apply()
 	{
+		double volume = properties.get("volume").getDouble().get();
 		int offsetShort = properties.get("offsetShort").getInteger().get();
 		int offsetLong = properties.get("offsetLong").getInteger().get();
 		int threshold = properties.get("threshold").getInteger().get();
@@ -34,7 +35,7 @@ public class PluginAnalyze extends PluginBase
 			.add(new AnalyzerCorrelation(Waveform1.get()))
 			.add(new AnalyzerContinuous(offsetShort, offsetLong))
 			.add(new AnalyzerQOM())
-			.add(new AnalyzerMul(0.02))
+			.add(new AnalyzerMul(volume))
 			.add(new AnalyzerExtractMountain(width, threshold, timeout)
 				.addMountainListener(new MountainListener1(offsetShort, offsetLong, firstThreshold, timeout, maxXError)
 					.addChainListener(new ChainListener1()
