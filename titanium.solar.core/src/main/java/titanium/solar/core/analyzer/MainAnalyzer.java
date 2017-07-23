@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -57,7 +58,7 @@ public class MainAnalyzer
 
 		// 対象ファイル列挙
 		Pattern pattern = Pattern.compile("(\\d{5}-(\\d{4})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2}))\\.dat");
-		getFiles(srcDir).stream()
+		getFiles(srcDir)
 			.forEach(p -> {
 				File fileIn = p.toFile().getAbsoluteFile();
 				Matcher matcher = pattern.matcher(fileIn.getName());
@@ -155,7 +156,7 @@ public class MainAnalyzer
 		System.exit(1);
 	}
 
-	private static ArrayList<Path> getFiles(File inputDir) throws IOException
+	private static Stream<Path> getFiles(File inputDir) throws IOException
 	{
 		ArrayList<Path> pathes = new ArrayList<>();
 		Files.walkFileTree(inputDir.toPath(), new SimpleFileVisitor<Path>() {
@@ -166,7 +167,7 @@ public class MainAnalyzer
 				return FileVisitResult.CONTINUE;
 			}
 		});
-		return pathes;
+		return pathes.stream().sorted();
 	}
 
 	private static void processFile(IFilter filter, File fileIn) throws IOException
