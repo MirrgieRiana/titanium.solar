@@ -1,0 +1,1 @@
+java -cp titanium.solar.core.jar titanium.solar.core.recorder.MainRecorder %*
