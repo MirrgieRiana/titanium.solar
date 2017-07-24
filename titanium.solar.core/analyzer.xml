@@ -4,6 +4,7 @@
       <waveformProvider class="titanium.solar.libs.analyze.waveformproviders.WaveformProviderLinkFile">
         <file>waveform.csv</file>
       </waveformProvider>
+      <hotspot>5</hotspot>
     </titanium.solar.libs.analyze.filters.FilterProviderCorrelation>
     <titanium.solar.libs.analyze.filters.FilterProviderContinuous>
       <offsetShort>45</offsetShort>
@@ -26,9 +27,11 @@
           <offsetLong>80</offsetLong>
           <firstThreshold>30</firstThreshold>
           <timeout>100</timeout>
-          <maxXError>3</maxXError>
+          <maxXError>10</maxXError>
           <chainListenersPrioviders>
-            <titanium.solar.core.analyzer.ChainListenerProviderOutput/>
+            <titanium.solar.core.analyzer.ChainListenerProviderOutput>
+              <samplesPerSecond>44100.0</samplesPerSecond>
+            </titanium.solar.core.analyzer.ChainListenerProviderOutput>
           </chainListenersPrioviders>
         </titanium.solar.libs.analyze.mountainlisteners.MountainListenerProviderChain>
       </mountainListenerPrioviders>

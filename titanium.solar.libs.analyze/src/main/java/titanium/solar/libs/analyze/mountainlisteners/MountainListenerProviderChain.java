@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import mirrg.lithium.struct.ImmutableArray;
+import mirrg.lithium.struct.Tuple;
 import titanium.solar.libs.analyze.filters.IMountainListener;
 import titanium.solar.libs.analyze.filters.IMountainListenerProvider;
 import titanium.solar.libs.analyze.filters.Mountain;
@@ -84,17 +85,18 @@ public class MountainListenerProviderChain implements IMountainListenerProvider
 
 			private void pullMountain()
 			{
-				Mountain nextShortMountain = null;
-				Mountain nextLongMountain = null;
-
-				for (Mountain mountain : mountains) {
-					if (isNextShortMountain(mountain)) {
-						nextShortMountain = mountain;
-					}
-					if (isNextLongMountain(mountain)) {
-						nextLongMountain = mountain;
-					}
-				}
+				Mountain nextShortMountain = mountains.stream()
+					.map(m -> new Tuple<>(m, getNextShortMountainDistance(m)))
+					.filter(t -> t.y < maxXError)
+					.min((a, b) -> a.y - b.y)
+					.map(t -> t.x)
+					.orElse(null);
+				Mountain nextLongMountain = mountains.stream()
+					.map(m -> new Tuple<>(m, getNextLongMountainDistance(m)))
+					.filter(t -> t.y < maxXError)
+					.min((a, b) -> a.y - b.y)
+					.map(t -> t.x)
+					.orElse(null);
 
 				if (nextShortMountain != null) {
 					if (nextLongMountain != null) {
@@ -136,16 +138,14 @@ public class MountainListenerProviderChain implements IMountainListenerProvider
 				}
 			}
 
-			private boolean isNextShortMountain(Mountain mountain)
+			private int getNextShortMountainDistance(Mountain mountain)
 			{
-				return mountain.x >= lastMountain.x + offsetShort - maxXError
-					&& mountain.x <= lastMountain.x + offsetShort + maxXError;
+				return (int) Math.abs(mountain.x - (lastMountain.x + offsetShort));
 			}
 
-			private boolean isNextLongMountain(Mountain mountain)
+			private int getNextLongMountainDistance(Mountain mountain)
 			{
-				return mountain.x >= lastMountain.x + offsetLong - maxXError
-					&& mountain.x <= lastMountain.x + offsetLong + maxXError;
+				return (int) Math.abs(mountain.x - (lastMountain.x + offsetLong));
 			}
 
 			private void cut(long x)

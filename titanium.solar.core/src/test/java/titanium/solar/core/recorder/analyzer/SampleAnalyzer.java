@@ -8,7 +8,7 @@ public class SampleAnalyzer
 	public static void main(String[] args) throws Exception
 	{
 		MainRecorder.main(new String[] {
-			"analyzer.recorder.properties",
+			"dynamicAnalyze.recorder.properties",
 		});
 	}
 

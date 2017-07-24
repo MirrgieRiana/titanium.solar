@@ -1,7 +1,7 @@
 package titanium.solar.core.recorder;
 
-import titanium.solar.core.recorder.core.EventRecoder;
-import titanium.solar.core.recorder.core.PluginBase;
+import titanium.solar.libs.record.core.EventRecoder;
+import titanium.solar.libs.record.core.PluginBase;
 
 public class PluginSample extends PluginBase
 {

@@ -26,17 +26,18 @@ public class MainMakeDefaultAnalyzerXML
 		int threshold = 10;
 		int firstThreshold = 30;
 		int width = 7;
-		int maxXError = 3;
+		int maxXError = 10;
 		int timeout = 100;
+		int samplesPerSecond = 44100;
 
 		IFilterProvider filterProvider = new FilterProviderConcatenate()
-			.add(new FilterProviderCorrelation(new WaveformProviderLinkFile(new File("waveform.csv"))))
+			.add(new FilterProviderCorrelation(new WaveformProviderLinkFile(new File("waveform.csv")), 5))
 			.add(new FilterProviderContinuous(offsetShort, offsetLong))
 			.add(new FilterProviderQOM())
 			.add(new FilterProviderMul(volume))
 			.add(new FilterProviderExtractMountain(width, threshold, timeout)
 				.addMountainListenerProvider(new MountainListenerProviderChain(offsetShort, offsetLong, firstThreshold, timeout, maxXError)
-					.addChainListenerProvider(new ChainListenerProviderOutput())));
+					.addChainListenerProvider(new ChainListenerProviderOutput(samplesPerSecond))));
 
 		System.out.println(new XStream().toXML(filterProvider));
 	}

@@ -1,18 +1,16 @@
 package titanium.solar.libs.analyze.mountainlisteners;
 
-import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 
 import mirrg.lithium.struct.ImmutableArray;
+import titanium.solar.libs.analyze.TimeConversion;
 import titanium.solar.libs.analyze.filters.Mountain;
 
 public class Chain
 {
-
-	public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
 	public final ImmutableArray<Mountain> mountains;
 	public final String binary;
@@ -38,7 +36,7 @@ public class Chain
 
 	public String toString(double samplesPerSecond)
 	{
-		String time = FORMATTER.format(mountains.get(0).getTime(samplesPerSecond));
+		String time = TimeConversion.format(mountains.get(0).getTime(samplesPerSecond));
 
 		if (binary.startsWith("1111")) {
 			String s = binary.substring(4);

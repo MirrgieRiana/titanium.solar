@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 project.group = 'titanium.solar'
 project.archivesBaseName = 'titanium.solar.libs.analyze'
-version = '0.0.11'
+version = '0.0.12'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

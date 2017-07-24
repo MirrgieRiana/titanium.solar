@@ -32,8 +32,6 @@ import titanium.solar.libs.analyze.IFilterProvider;
 public class MainAnalyzer
 {
 
-	public static double samplePerSecond;
-
 	private static File srcDir = null;
 	private static File destDir = null;
 	private static PropertiesMultipleInheritable properties = new PropertiesMultipleInheritable();
@@ -49,8 +47,6 @@ public class MainAnalyzer
 		// フィルタ取得
 		EventManager<EventFilterControl> eventManager = new EventManager<>();
 		IFilter filter = ((IFilterProvider) new XStream().fromXML(new File(properties.get("analyzer").getString().get()))).createFilter(eventManager);
-
-		samplePerSecond = properties.get("samplePerSecond").getDouble().get();
 
 		////////////////////////////////////////////////////////////////////
 
@@ -183,7 +179,7 @@ public class MainAnalyzer
 					buffer[i] = bytes[i];
 				}
 
-				filter.accept(buffer, len);
+				filter.accept(buffer, len, new Struct1<>(0.0));
 			}
 		}
 	}

@@ -10,11 +10,18 @@ public class ChainListenerProviderOutput implements IChainListenerProvider
 
 	public static PrintStream out;
 
+	private double samplesPerSecond;
+
+	public ChainListenerProviderOutput(double samplesPerSecond)
+	{
+		this.samplesPerSecond = samplesPerSecond;
+	}
+
 	@Override
 	public IChainListener createChainListener()
 	{
 		return chain -> {
-			if (chain.isValid()) out.println(chain.toString(MainAnalyzer.samplePerSecond));
+			if (chain.isValid()) out.println(chain.toString(samplesPerSecond));
 		};
 	}
 

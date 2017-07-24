@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import mirrg.lithium.properties.HPropertiesParser;
 import mirrg.lithium.properties.IProperties;
 import mirrg.lithium.properties.PropertiesMultipleInheritable;
-import titanium.solar.core.recorder.core.IPlugin;
-import titanium.solar.core.recorder.core.Recorder;
+import titanium.solar.libs.record.core.IPlugin;
+import titanium.solar.libs.record.core.Recorder;
 
 public class MainRecorder
 {
