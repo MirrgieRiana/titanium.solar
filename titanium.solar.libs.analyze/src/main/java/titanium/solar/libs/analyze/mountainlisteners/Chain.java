@@ -58,4 +58,9 @@ public class Chain
 		return String.format("%s,%s,[%s]", time, length, binary);
 	}
 
+	public Mountain getFirstMountain()
+	{
+		return mountains.get(0);
+	}
+
 }

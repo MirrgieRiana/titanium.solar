@@ -19,7 +19,8 @@ public class FilterProviderQOM implements IFilterProvider
 	@Override
 	public IFilter createFilter(EventManager<EventFilterControl> eventManager)
 	{
-		return (buffer, length) -> {
+		return (buffer, length, offset) -> {
+			offset.x += 1;
 			for (int i = 0; i < length; i++) {
 				double x = buffer[i];
 				double dd = (x - prevX) - (prevX - prevPrevX);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 import mirrg.lithium.event.EventManager;
+import mirrg.lithium.struct.Struct1;
 import titanium.solar.libs.analyze.EventFilterControl;
 import titanium.solar.libs.analyze.IFilter;
 import titanium.solar.libs.analyze.IFilterProvider;
@@ -65,7 +66,7 @@ public class FilterProviderExtractMountain implements IFilterProvider
 			}
 
 			@Override
-			public void accept(double[] buffer, int length)
+			public void accept(double[] buffer, int length, Struct1<Double> offset)
 			{
 				for (int i = 0; i < length; i++) {
 
@@ -90,7 +91,11 @@ public class FilterProviderExtractMountain implements IFilterProvider
 					if (maxPrev >= threshold && max < threshold) {
 						// 下山した
 						//System.out.println("#" + xTop + " " + yTop); // TODO
-						Mountain mountain = new Mountain(topX, time, topX - startX, topY);
+						Mountain mountain = new Mountain(
+							topX - (long) (double) offset.x,
+							time,
+							topX - startX - (long) (double) offset.x,
+							topY);
 						mountainListeners.forEach(l -> l.onMountain(mountain));
 						lastX = x;
 						topX = 0;

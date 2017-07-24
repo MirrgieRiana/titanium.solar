@@ -1,6 +1,7 @@
 package titanium.solar.libs.analyze.filters;
 
 import mirrg.lithium.event.EventManager;
+import mirrg.lithium.struct.Struct1;
 import titanium.solar.libs.analyze.EventFilterControl;
 import titanium.solar.libs.analyze.IFilter;
 import titanium.solar.libs.analyze.IFilterProvider;
@@ -30,8 +31,9 @@ public class FilterProviderContinuous implements IFilterProvider
 			private int index = 0;
 
 			@Override
-			public void accept(double[] buffer, int length)
+			public void accept(double[] buffer, int length, Struct1<Double> offset)
 			{
+				offset.x += offsetLong;
 				for (int i = 0; i < length; i++) {
 
 					cache[index] = buffer[i];

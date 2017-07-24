@@ -18,7 +18,7 @@ public class FilterProviderMul implements IFilterProvider
 	@Override
 	public IFilter createFilter(EventManager<EventFilterControl> eventManager)
 	{
-		return (buffer, length) -> {
+		return (buffer, length, offset) -> {
 			for (int i = 0; i < length; i++) {
 				buffer[i] *= x;
 			}

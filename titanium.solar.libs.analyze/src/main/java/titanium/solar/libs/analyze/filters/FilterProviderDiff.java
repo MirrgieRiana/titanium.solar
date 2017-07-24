@@ -13,10 +13,12 @@ public class FilterProviderDiff implements IFilterProvider
 	@Override
 	public IFilter createFilter(EventManager<EventFilterControl> eventManager)
 	{
-		return (buffer, length) -> {
+		return (buffer, length, offset) -> {
+			offset.x += 1;
 			for (int i = 0; i < length; i++) {
-				buffer[i] = buffer[i] - prevX;
-				prevX = buffer[i];
+				double x = buffer[i];
+				buffer[i] = x - prevX;
+				prevX = x;
 			}
 		};
 	}

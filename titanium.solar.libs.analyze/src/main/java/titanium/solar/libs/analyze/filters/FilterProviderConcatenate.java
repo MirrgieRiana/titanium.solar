@@ -19,7 +19,7 @@ public class FilterProviderConcatenate implements IFilterProvider
 		ArrayList<IFilter> filters = filterProviders.stream()
 			.map(fp -> fp.createFilter(eventManager))
 			.collect(Collectors.toCollection(ArrayList::new));
-		return (buffer, length) -> filters.forEach(f -> f.accept(buffer, length));
+		return (buffer, length, offset) -> filters.forEach(f -> f.accept(buffer, length, offset));
 	}
 
 	public FilterProviderConcatenate add(IFilterProvider filterProvider)
