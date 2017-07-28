@@ -2,9 +2,10 @@ package titanium.solar.libs.analyze.mountainlisteners;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import mirrg.lithium.struct.ImmutableArray;
-import mirrg.lithium.struct.Tuple;
+import mirrg.lithium.struct.Tuple3;
 import titanium.solar.libs.analyze.filters.IMountainListener;
 import titanium.solar.libs.analyze.filters.IMountainListenerProvider;
 import titanium.solar.libs.analyze.filters.Mountain;
@@ -56,18 +57,23 @@ public class MountainListenerProviderChain implements IMountainListenerProvider
 				if (lastMountain == null) {
 					// 初めての山はタイミングに関わらず受理
 					if (mountain.y >= firstThreshold) {
-						lastMountain = mountain;
-						mountains = new ArrayList<>();
-
-						mountainsChain = new ArrayList<>();
-						mountainsChain.add(lastMountain);
-						chain = "";
+						setFirstMountain(mountain);
 					}
 					return;
 				}
 
 				mountains.add(mountain);
 				spend(mountain.x);
+			}
+
+			private void setFirstMountain(Mountain mountain)
+			{
+				lastMountain = mountain;
+				mountains = new ArrayList<>();
+
+				mountainsChain = new ArrayList<>();
+				mountainsChain.add(lastMountain);
+				chain = "";
 			}
 
 			@Override
@@ -85,56 +91,26 @@ public class MountainListenerProviderChain implements IMountainListenerProvider
 
 			private void pullMountain()
 			{
-				Mountain nextShortMountain = mountains.stream()
-					.map(m -> new Tuple<>(m, getNextShortMountainDistance(m)))
-					.filter(t -> t.y < maxXError)
-					.min((a, b) -> a.y - b.y)
-					.map(t -> t.x)
-					.orElse(null);
-				Mountain nextLongMountain = mountains.stream()
-					.map(m -> new Tuple<>(m, getNextLongMountainDistance(m)))
-					.filter(t -> t.y < maxXError)
-					.min((a, b) -> a.y - b.y)
-					.map(t -> t.x)
+				Tuple3<Mountain, Double, String> tuple3 = Stream.concat(
+					mountains.stream()
+						.map(m -> new Tuple3<>(m, 1 - (double) getNextShortMountainDistance(m) / maxXError, "0")),
+					mountains.stream()
+						.map(m -> new Tuple3<>(m, (1 - (double) getNextLongMountainDistance(m) / maxXError) * 0.75, "1")))
+					.filter(t -> t.x.y >= lastMountain.y * 0.5)
+					.filter(t -> t.y >= 0)
+					.max((a, b) -> (int) Math.signum(a.y - b.y))
 					.orElse(null);
 
-				if (nextShortMountain != null) {
-					if (nextLongMountain != null) {
-						// 山が両方見つかった
-
-						if (nextShortMountain.y > nextLongMountain.y) {
-							// 短山を選択
-							lastMountain = nextShortMountain;
-							mountainsChain.add(lastMountain);
-							chain += "0";
-							cut(lastMountain.x);
-						} else {
-							// 長山を選択
-							lastMountain = nextLongMountain;
-							mountainsChain.add(lastMountain);
-							chain += "1";
-							cut(lastMountain.x);
-						}
-
-					} else {
-						// 短山だけが見つかった
-						lastMountain = nextShortMountain;
-						mountainsChain.add(lastMountain);
-						chain += "0";
-						cut(lastMountain.x);
-					}
+				if (tuple3 == null) {
+					// 山が見つからなかったのでパケット終了
+					lastMountain = null;
+					chainListeners.forEach(l -> l.onChain(new Chain(new ImmutableArray<>(mountainsChain), chain)));
 				} else {
-					if (nextLongMountain != null) {
-						// 長山だけが見つかった
-						lastMountain = nextLongMountain;
-						mountainsChain.add(lastMountain);
-						chain += "1";
-						cut(lastMountain.x);
-					} else {
-						// 山が見つからなかったのでパケット終了
-						lastMountain = null;
-						chainListeners.forEach(l -> l.onChain(new Chain(new ImmutableArray<>(mountainsChain), chain)));
-					}
+					// 山が見つかったので追加
+					lastMountain = tuple3.x;
+					mountainsChain.add(lastMountain);
+					chain += tuple3.z;
+					cut(lastMountain.x);
 				}
 			}
 
