@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
+import mirrg.lithium.struct.Tuple;
 import titanium.solar.libs.analyze.TimeConversion;
 
 public class Main6Syuukei
@@ -58,6 +59,7 @@ public class Main6Syuukei
 			{
 				int maxId = 48;
 				int[] sumVoltages = new int[maxId + 1];
+				int[] sumTemperature = new int[maxId + 1];
 				int[] counts = new int[maxId + 1];
 
 				packets.forEach(p -> {
@@ -66,6 +68,7 @@ public class Main6Syuukei
 					if (p.crc01 != (p.crc() & 0xff)) return;
 
 					sumVoltages[p.id] += p.voltage;
+					sumTemperature[p.id] += p.temperature;
 					counts[p.id]++;
 				});
 
@@ -73,8 +76,19 @@ public class Main6Syuukei
 					.map(i -> counts[i])
 					.toArray());
 				DoubleStatistics statisticsVoltage = new DoubleStatistics(IntStream.range(1, 48)
-					.mapToDouble(i -> counts[i] == 0 ? 0 : (double) sumVoltages[i] / counts[i])
+					.filter(i -> counts[i] != 0)
+					.mapToDouble(i -> (double) sumVoltages[i] / counts[i])
 					.toArray());
+				DoubleStatistics statisticsTemperature = new DoubleStatistics(IntStream.range(1, 48)
+					.filter(i -> counts[i] != 0)
+					.mapToDouble(i -> (double) sumTemperature[i] / counts[i])
+					.toArray());
+				String ranking = IntStream.range(1, 48)
+					.mapToObj(i -> new Tuple<>(i, counts[i]))
+					.sorted((a, b) -> -(a.y - b.y))
+					.limit(5)
+					.map(t -> t.y + "(ID:" + t.x + ")")
+					.collect(Collectors.joining(" / "));
 				String string = IntStream.range(1, 48)
 					.mapToObj(i -> String.format(" %6.2f/%4d",
 						counts[i] == 0 ? 0 : (double) sumVoltages[i] / counts[i],
@@ -86,7 +100,7 @@ public class Main6Syuukei
 					FORMATTER.format(threshold.minusMinutes(10)),
 					sb.toString()));
 					*/
-				System.out.println(String.format("%s,%s,%s,%s,%s"
+				System.out.println(String.format("%s,%s,%s,%s,%s,%s,%s,%s"
 					//+ ",%s"
 					+ "",
 					TimeConversion.format(threshold.minusMinutes(10)),
@@ -94,6 +108,9 @@ public class Main6Syuukei
 					statisticsCount.variance,
 					statisticsVoltage.average,
 					statisticsVoltage.variance,
+					statisticsTemperature.average,
+					statisticsTemperature.variance,
+					ranking,
 					//string,
 					null));
 			}
@@ -141,11 +158,11 @@ public class Main6Syuukei
 				.sum();
 			average = DoubleStream.of(doubles)
 				.average()
-				.getAsDouble();
+				.orElse(0);
 			variance = DoubleStream.of(doubles)
 				.map(d -> d * d)
 				.average()
-				.getAsDouble() - average * average;
+				.orElse(0) - average * average;
 		}
 
 	}
