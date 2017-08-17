@@ -17,6 +17,77 @@ import titanium.solar.libs.analyze.TimeConversion;
 public class Main6Syuukei
 {
 
+	public static void main2(String[] args)
+	{
+		int[][] a = new int[][] {
+			{
+				79, 22, 44, 79, 60
+			},
+			{
+				68, 24, 46, 187, 217
+			},
+			{
+				73, 22, 46, 46, 116
+			},
+			{
+				104, 20, 44, 254, 38
+			},
+			{
+				90, 22, 47, 30, 31
+			},
+			{
+				72, 22, 43, 191, 38
+			},
+			{
+				63, 20, 47, 15, 214
+			},
+			{
+				77, 15, 43, 164, 247
+			},
+			{
+				77, 14, 43, 165, 247
+			},
+			{
+				74, 22, 43, 30, 117
+			},
+			{
+				93, 14, 43, 164, 247
+			},
+			{
+				67, 21, 42, 15, 163
+			},
+			{
+				68, 21, 47, 126, 194
+			},
+			{
+				100, 22, 51, 126, 203
+			},
+			{
+				111, 20, 49, 143, 86
+			},
+			{
+				100, 22, 51, 126, 203
+			},
+			{
+				110, 18, 47, 93, 1
+			},
+			{
+				100, 22, 49, 255, 203
+			},
+			{
+				77, 13, 45, 37, 67
+			},
+		};
+		for (int[] b : a) {
+			int c = Packet1.crc(new byte[] {
+				(byte) (b[0] & 0xff),
+				(byte) (b[1] & 0xff),
+				(byte) (b[2] & 0xff),
+			});
+			System.out.println(b[3] + " " + b[4] + " " + (c >> 8) + " " + (c & 0xff));
+		}
+	}
+
 	public static void main(String[] args)
 	{
 		File srcFile = new File("H:\\amyf\\jesqenvina\\xa1\\5_extract\\data.csv");

@@ -41,7 +41,7 @@ public class MainSynchronizer
 		while (true) {
 			new Thread(() -> {
 				try {
-					sendMasterPacket(pin, data);
+					sendPacket(pin, data);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -53,7 +53,46 @@ public class MainSynchronizer
 		//gpio.shutdown();
 	}
 
-	private static void sendMasterPacket(GpioPinDigitalOutput pin, int[] data) throws InterruptedException
+	public static IPacketSender createPacketSender() throws Exception, UnsatisfiedLinkError
+	{
+		IProperties properties = parse("default.synchronizer.properties", new String[0]);
+
+		String gpioPin = properties.get("gpioPin").getString().get();
+		highUs = properties.get("highUs").getInteger().get();
+		zeroLowUs = properties.get("zeroLowUs").getInteger().get();
+		oneLowUs = properties.get("oneLowUs").getInteger().get();
+
+		GpioController gpio = GpioFactory.getInstance();
+		Pin pinName = (Pin) RaspiPin.class.getField(gpioPin).get(null);
+		GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(pinName, MainSynchronizer.class.getPackage().getName(), PinState.LOW);
+
+		return new IPacketSender() {
+
+			@Override
+			public void send(int[] data) throws InterruptedException
+			{
+				sendPacket(pin, data);
+			}
+
+			@Override
+			public void close()
+			{
+				gpio.shutdown();
+			}
+
+		};
+	}
+
+	public static interface IPacketSender
+	{
+
+		public void send(int[] data) throws InterruptedException;
+
+		public void close();
+
+	}
+
+	public static void sendPacket(GpioPinDigitalOutput pin, int[] data) throws InterruptedException
 	{
 		sendPre(pin);
 		for (int i : data) {
@@ -62,7 +101,7 @@ public class MainSynchronizer
 		sendPost(pin);
 	}
 
-	private static void sendByte(GpioPinDigitalOutput pin, int b) throws InterruptedException
+	public static void sendByte(GpioPinDigitalOutput pin, int b) throws InterruptedException
 	{
 		for (int i = 0; i < 8; i++) {
 			if ((b & (1 << i)) != 0) {
@@ -73,7 +112,7 @@ public class MainSynchronizer
 		}
 	}
 
-	private static void sendPre(GpioPinDigitalOutput pin) throws InterruptedException
+	public static void sendPre(GpioPinDigitalOutput pin) throws InterruptedException
 	{
 		sendOne(pin);
 		sendOne(pin);
@@ -81,13 +120,13 @@ public class MainSynchronizer
 		sendOne(pin);
 	}
 
-	private static void sendPost(GpioPinDigitalOutput pin) throws InterruptedException
+	public static void sendPost(GpioPinDigitalOutput pin) throws InterruptedException
 	{
 		sendOne(pin);
 		sendBlank(pin);
 	}
 
-	private static void sendZero(GpioPinDigitalOutput pin) throws InterruptedException
+	public static void sendZero(GpioPinDigitalOutput pin) throws InterruptedException
 	{
 		pin.high();
 		sleep(highUs);
@@ -95,7 +134,7 @@ public class MainSynchronizer
 		sleep(zeroLowUs);
 	}
 
-	private static void sendOne(GpioPinDigitalOutput pin) throws InterruptedException
+	public static void sendOne(GpioPinDigitalOutput pin) throws InterruptedException
 	{
 		pin.high();
 		sleep(highUs);
@@ -103,12 +142,12 @@ public class MainSynchronizer
 		sleep(oneLowUs);
 	}
 
-	private static void sendBlank(GpioPinDigitalOutput pin) throws InterruptedException
+	public static void sendBlank(GpioPinDigitalOutput pin) throws InterruptedException
 	{
 		sleep(5000);
 	}
 
-	private static void sleep(int micros)
+	public static void sleep(int micros)
 	{
 		long start = System.nanoTime();
 		while (System.nanoTime() < start + micros * 1000) {
