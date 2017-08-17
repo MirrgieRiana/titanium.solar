@@ -1,5 +1,6 @@
 package titanium.solar.libs.analyze.mountainlisteners;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,6 +33,23 @@ public class Chain
 			}
 		}
 		return false;
+	}
+
+	public Optional<int[]> getBytes()
+	{
+		if (binary.startsWith("1111")) {
+			String s = binary.substring(4);
+			if (s.length() % 8 == 0) {
+				return Optional.of(IntStream
+					.range(0, s.length() / 8)
+					.map(i1 -> i1 * 8)
+					.mapToObj(i2 -> s.substring(i2, i2 + 8))
+					.map(s21 -> StringUtils.reverse(s21))
+					.mapToInt(s22 -> Integer.parseInt(s22, 2))
+					.toArray());
+			}
+		}
+		return Optional.empty();
 	}
 
 	public String toString(double samplesPerSecond)
