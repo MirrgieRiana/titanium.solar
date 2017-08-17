@@ -113,6 +113,12 @@ public class FilterProviderExtractMountain implements IFilterProvider
 				}
 			}
 
+			@Override
+			public void close()
+			{
+				mountainListeners.forEach(l -> l.close());
+			}
+
 		};
 	}
 

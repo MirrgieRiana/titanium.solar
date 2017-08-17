@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Solar Packet Viewer</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<script src="/jquery-3.2.1.min.js"></script>
+<script src="/Chart.bundle.min.js"></script>
+<script src="/moment.js"></script>
+<script>
+	var webSocket;
+	var chart;
+	var datasets;
+	var now = null;
+	var visiblePeriod = 1 * 60 * 1000;
+	var maxPeriod = 5 * 60 * 1000;
+
+	$(function() {
+		$("#chart").on("load", function() {
+			initChart();
+		});
+		$.ajax({
+			url : "/api/streamPort",
+			dataType : 'json',
+			cache : false,
+			data : {},
+			success : function(data, dataType) {
+				webSocket = new WebSocket("ws://" + location.hostname + ":"
+						+ data + "/");
+				webSocket.onopen = function() {
+					addRecord(createTextRecord("Connection opened"));
+				};
+				webSocket.onclose = function() {
+					addRecord(createTextRecord("Connection closed"));
+				};
+				webSocket.onmessage = function(e) {
+					processMessage(e.data);
+				};
+				webSocket.onerror = function(e) {
+					addRecord(createTextRecord("Error: " + e));
+				};
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				addRecord(createTextRecord("Error: " + textStatus));
+			},
+		});
+	});
+
+	function initChart() {
+		chart = new Chart(
+				$("#chart").contents().find("#chart")[0].getContext('2d'),
+				{
+					type : 'scatter',
+					data : {
+						datasets : datasets = [ {
+							label : 'Voltage',
+							yAxisID : 'voltage',
+							borderColor : "#880",
+							pointStyle : "circle",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Temperature',
+							yAxisID : 'temperature',
+							borderColor : "#f40",
+							pointStyle : "circle",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Voltage',
+							yAxisID : 'voltage',
+							borderColor : "#880",
+							pointStyle : "crossRot",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Temperature',
+							yAxisID : 'temperature',
+							borderColor : "#f40",
+							pointStyle : "crossRot",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Voltage',
+							yAxisID : 'voltage',
+							borderColor : "#880",
+							pointStyle : "triangle",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Temperature',
+							yAxisID : 'temperature',
+							borderColor : "#f40",
+							pointStyle : "triangle",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Voltage',
+							yAxisID : 'voltage',
+							borderColor : "#880",
+							pointStyle : "rect",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						}, {
+							label : 'Temperature',
+							yAxisID : 'temperature',
+							borderColor : "#f40",
+							pointStyle : "rect",
+							pointRadius : 6,
+							fill : false,
+							data : []
+						} ]
+					},
+					options : {
+						legend : {
+							display : false
+						},
+						tooltips : {
+							enabled : false
+						},
+						scales : {
+							xAxes : [ {
+								id : 'x',
+								type : 'time',
+								position : 'bottom',
+								maxRotation : 180,
+								minRotation : 90,
+								time : {
+									displayFormats : {
+										second : "HH:mm:ss"
+									},
+									unit : "second",
+									unitStepSize : 10,
+								},
+								ticks : {
+									min : parseTime("20000101-000000-000")
+											.valueOf(),
+									max : parseTime("20000101-000000-000")
+											.valueOf()
+											+ visiblePeriod
+								},
+								afterFit : function(axis) {
+									if (now != null) {
+										axis.max = now;
+										axis.min = axis.max - visiblePeriod;
+
+										datasets
+												.forEach(function(dataset) {
+													for (var i = 0; i < dataset.data; i++) {
+														if (i + 1 < dataset.data.length) {
+															if (dataset.data[i + 1].x
+																	.valueOf() < now
+																	- maxPeriod) {
+																dataset.data
+																		.shift();
+																i--;
+															} else {
+																break;
+															}
+														}
+													}
+												});
+									}
+								}
+							} ],
+							yAxes : [ {
+								id : 'voltage',
+								type : 'linear',
+								position : 'left',
+								ticks : {
+									min : 0,
+									max : 16,
+									stepSize : 5
+								},
+								scaleLabel : {
+									display : true,
+									labelString : "Voltage"
+								}
+							}, {
+								id : 'temperature',
+								type : 'linear',
+								position : 'right',
+								ticks : {
+									min : 0,
+									max : 64,
+									stepSize : 10
+								},
+								scaleLabel : {
+									display : true,
+									labelString : "Temperature"
+								}
+							} ]
+						},
+						elements : {
+							line : {
+								tension : 0, // ベジェ無効
+							}
+						}
+					}
+				});
+		setInterval(function() {
+			now += 20;
+			chart.update();
+		}, 20);
+	}
+
+	function send(packet) {
+		webSocket.send(JSON.stringify(packet));
+	}
+
+	function parseTime(time) {
+		return moment(time, "YYYYMMDD-HHmmss-SSS");
+	}
+
+	function processMessage(data) {
+		if ($("#receive").is(':checked')) {
+			var entry = JSON.parse(data);
+			if (entry.binary.length >= $("#min_length").val()) {
+
+				var $record = createRecord(entry);
+				addRecord($record);
+
+				if (entry.bytes != null) {
+					processPacket({
+						"dest_id" : entry.bytes[0],
+						"command" : entry.bytes[1],
+						"length" : entry.bytes[2],
+						"own_id" : entry.bytes[3],
+						"contents" : entry.bytes.slice(4, -1),
+						"crc" : [ entry.bytes[entry.bytes.length - 1], ],
+					}, entry, $record.find(".cell_extra"));
+				}
+
+			}
+		}
+	}
+
+	function processPacket(data, entry, $extra) {
+		var $span;
+
+		$span = $("<span>");
+		$span.css("color", "red");
+		$span.text(data.own_id + "→" + data.dest_id + ":" + data.command + "("
+				+ data.contents + ")");
+		$extra.append($span);
+
+		if (data.command == 5) {
+			onDataResp(data, entry, $extra);
+		}
+
+	}
+
+	function onDataResp(data, entry, $extra) {
+		var index = null;
+		for (var i = 0; i < $("#view_id").children().length; i++) {
+			if ($($("#view_id").children()[i]).find(".value").text() == data.own_id) {
+				index = i;
+				break;
+			}
+		}
+		if (index != null) {
+
+			// グラフ更新
+			{
+				var time = parseTime(entry.time);
+
+				now = time.valueOf();
+
+				datasets[index * 2].data.push({
+					x : time,
+					y : data.contents[0],
+				});
+				datasets[index * 2 + 1].data.push({
+					x : time,
+					y : data.contents[1],
+				});
+				chart.update();
+			}
+
+			// 右下の表更新
+			{
+
+				// 各要素
+				var $vv = $($("#view_voltage").children()[index]).find(
+						".view_value");
+				var $tv = $($("#view_temperature").children()[index]).find(
+						".view_value");
+				var $vd = $($("#view_voltage").children()[index]).find(
+						".view_diff");
+				var $td = $($("#view_temperature").children()[index]).find(
+						".view_diff");
+
+				// 値
+				var v = $vv.text();
+				var t = $tv.text();
+				var vv = data.contents[0] - v;
+				var tt = data.contents[1] - t;
+
+				// リセット
+				$vd.removeClass("pos");
+				$vd.removeClass("neg");
+				$vd.removeClass("zero");
+				$td.removeClass("pos");
+				$td.removeClass("neg");
+				$td.removeClass("zero");
+
+				// 電圧セット
+				$vv.text(data.contents[0]);
+				if (vv > 0) {
+					$vd.addClass("pos");
+				} else if (vv < 0) {
+					$vd.addClass("neg");
+				} else {
+					$vd.addClass("zero");
+				}
+				$vd.text(vv > 0 ? "+" + vv : vv);
+				$vd.stop();
+				$vd.css("opacity", "1");
+				$vd.fadeTo(2000, 0.01);
+
+				// 温度セット
+				$tv.text(data.contents[1]);
+				if (tt > 0) {
+					$td.addClass("pos");
+				} else if (tt < 0) {
+					$td.addClass("neg");
+				} else {
+					$td.addClass("zero");
+				}
+				$td.text(tt > 0 ? "+" + tt : tt);
+				$td.stop();
+				$td.css("opacity", "1");
+				$td.fadeTo(2000, 0.01);
+
+			}
+
+		} else {
+			console.log(index);
+		}
+	}
+
+	function createRecord(entry) {
+		var $record = $("<tr>");
+		var $field;
+
+		$field = $("<td>");
+		$field.addClass("cell_id");
+		$field.text(entry.id);
+		$record.append($field);
+
+		$field = $("<td>");
+		$field.addClass("cell_time");
+		$field.text(entry.time);
+		$field.attr("title", entry.time_int);
+		$record.append($field);
+
+		$field = $("<td>");
+		$field.addClass("cell_bytes");
+		$field.text(entry.bytes);
+		$record.append($field);
+
+		$field = $("<td>");
+		$field.addClass("cell_binary");
+		$field.text(entry.binary);
+		$record.append($field);
+
+		$field = $("<td>");
+		$field.addClass("cell_extra");
+		$record.append($field);
+
+		return $record;
+	}
+
+	function createTextRecord(string) {
+		var $record = $("<tr>");
+		var $field;
+
+		$field = $("<td>");
+		$record.append($field);
+
+		$field = $("<td>");
+		$field.addClass("cell_text");
+		$field.attr("colspan", "4");
+		$field.text(string);
+		$record.append($field);
+
+		return $record;
+	}
+
+	function addRecord(record) {
+		var $scroll = $("#packet_list").contents().find("#scroll");
+		var $data = $("#packet_list").contents().find("#data");
+
+		// 追加
+		var scrollable = $("#auto_scroll").is(':checked')
+				&& $scroll[0].scrollTop >= $scroll[0].scrollHeight
+						- $scroll[0].clientHeight - 20;
+		$data.append(record);
+		if (scrollable) {
+			scrollDown();
+		}
+
+		// 削除
+		var $children = $data.children();
+		var overflow = $children.length - 1000;
+		if (overflow > 0) {
+			for (var i = 0; i < overflow; i++) {
+				$children[i].remove();
+			}
+		}
+
+	}
+
+	function scrollDown() {
+		var $scroll = $("#packet_list").contents().find("#scroll");
+		$scroll[0].scrollTop = $scroll[0].scrollHeight
+				- $scroll[0].clientHeight;
+	}
+</script>
+<style>
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+table.layout {
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+table.solid>*>*>td {
+	border: 1px inset #eee;
+	padding: 4px;
+}
+
+#packet_list {
+	height: 100%;
+	width: 100%;
+}
+
+#chart {
+	height: 100%;
+	width: 100%;
+}
+
+#view_id {
+	text-align: center;
+	color: #080;
+	font-weight: bold;
+	font-size: 120%;
+	text-align: center;
+}
+
+#view_voltage {
+	text-align: center;
+	color: #880;
+	font-weight: bold;
+	font-size: 200%;
+}
+
+#view_temperature {
+	text-align: center;
+	color: #f40;
+	font-weight: bold;
+	font-size: 200%;
+}
+
+.view_value {
+	display: inline-block;
+	width: 3ex;
+}
+
+.view_diff {
+	font-weight: bold;
+	font-size: 50%;
+	display: inline-block;
+	width: 3ex;
+}
+
+.view_diff.pos {
+	color: #080;
+}
+
+.view_diff.zero {
+	color: #444;
+}
+
+.view_diff.neg {
+	color: red;
+}
+</style>
+</head>
+<body>
+	<table class="layout solid">
+		<tr style="height: 0%;">
+			<td colspan="2"><input type="text" class="value"
+				value="255 1 2 1 0"><input type="button" value="Send"
+				onclick='send($(this.parentNode).find(".value").val().split(" ").map(function(i){return i*1;}))'></td>
+		</tr>
+		<tr style="height: 100%;">
+			<td style="width: 60%;" rowspan="2">
+				<table class="layout">
+					<tr style="height: 100%;">
+						<td><iframe id="chart" src="chart.html" frameborder="no"></iframe></td>
+					</tr>
+					<tr style="height: 0%;">
+						<td style="text-align: center;"><label><input
+								type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 5 * 60 * 1000">5m</label> <label><input
+								type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 2 * 60 * 1000">2m</label> <label><input
+								type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 1 * 60 * 1000" checked="checked">1m</label>
+							<label><input type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 1 * 30 * 1000">30s </label> <label><input
+								type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 1 * 10 * 1000">10s</label> <label><input
+								type="radio" name="visiblePeriod"
+								onclick="visiblePeriod = 1 * 5 * 1000">5s</label></td>
+					</tr>
+				</table>
+			</td>
+			<td style="width: 40%;">
+				<table class="layout">
+					<tr style="height: 100%;">
+						<td><iframe id="packet_list" src="packet_list.html"
+								frameborder="no"></iframe></td>
+					</tr>
+					<tr style="height: 0%;">
+						<td><label><input type="checkbox" id="receive"
+								checked="checked">Receive</label> <input type="button"
+							onclick="scrollDown()" value="↓"><label><input
+								type="checkbox" id="auto_scroll" checked="checked">AutoScroll</label>
+							MinLength: <input type="text" id="min_length" style="width: 3ex;"
+							value="20"></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="height: 0%;">
+			<td>
+				<table class="layout">
+					<colgroup>
+						<col width="25%" span="4">
+					</colgroup>
+					<tr id="view_id" style="height: 0%;">
+						<td><span class="value">2</span> ○</td>
+						<td><span class="value">3</span> ×</td>
+						<td><span class="value">4</span> △</td>
+						<td><span class="value">5</span> □</td>
+					</tr>
+					<tr id="view_voltage" style="height: 0%;">
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+					</tr>
+					<tr id="view_temperature" style="height: 0%;">
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+						<td><span class="view_value"></span> <span
+							class="view_diff neg" style="opacity: 0.01;">0</span></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

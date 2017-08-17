@@ -37,7 +37,8 @@ public class MainMakeDefaultPluginDynamicAnalyzeXML
 			.add(new FilterProviderMul(volume))
 			.add(new FilterProviderExtractMountain(width, threshold, timeout)
 				.addMountainListenerProvider(new MountainListenerProviderChain(offsetShort, offsetLong, firstThreshold, timeout, maxXError)
-					.addChainListenerProvider(new ChainListenerProviderStdout(samplesPerSecond))));
+					.addChainListenerProvider(new ChainListenerProviderStdout(samplesPerSecond))
+					.addChainListenerProvider(new ChainListenerProviderWeb(samplesPerSecond, "0.0.0.0", 8080, 10, 8081, false))));
 
 		System.out.println(new XStream().toXML(filterProvider));
 	}

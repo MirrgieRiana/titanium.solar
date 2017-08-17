@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+}
+
+#scroll {
+	overflow: scroll;
+}
+
+#data {
+	font-size: 12px;
+	font-family: monospace;
+	white-space: nowrap;
+}
+
+.cell_id {
+	text-align: right;
+	font-weight: bold;
+	color: #080;
+}
+
+.cell_time {
+	color: #44f;
+}
+
+.cell_bytes {
+	color: #000;
+}
+
+.cell_binary {
+	color: #000;
+}
+
+.cell_extra {
+	color: #000;
+}
+
+.cell_text {
+	color: #444;
+	background-color: white;
+}
+</style>
+</head>
+<body id="scroll" style="width: 5000px;">
+	<table style="table-layout: fixed; border-collapse: collapse;">
+		<colgroup>
+			<col style="width: 6ex;">
+			<col style="width: 20ex; background-color: #f4f4f4;">
+			<col style="width: 20ex;">
+			<col style="width: 100ex; background-color: #f4f4f4;">
+			<col style="width: 300ex;">
+		</colgroup>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Time</th>
+				<th>Bytes</th>
+				<th>Binary</th>
+				<th>Extra</th>
+			</tr>
+		</thead>
+		<tbody id="data">
+		</tbody>
+	</table>
+</body>
+</html>

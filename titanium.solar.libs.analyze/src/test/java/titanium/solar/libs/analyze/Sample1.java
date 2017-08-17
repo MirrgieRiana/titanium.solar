@@ -26,7 +26,7 @@ public class Sample1
 		int bufferLength = samplesPerSecond;
 
 		EventManager<EventFilterControl> eventManager = new EventManager<>();
-		IFilter filter = new FilterProviderConcatenate()
+		IFilterProvider filterProvider = new FilterProviderConcatenate()
 			.add(new FilterProviderCorrelation(new WaveformProviderLinkURL(Sample1.class.getResource("waveform.csv")), 5))
 			.add(new FilterProviderContinuous(45, 80))
 			.add(new FilterProviderQOM())
@@ -36,13 +36,13 @@ public class Sample1
 					.addChainListenerProvider(() -> chain -> System.out.println(String.format("%3d %6x %s",
 						chain.mountains.length(),
 						chain.getFirstMountain().x,
-						chain.toString(samplesPerSecond))))))
-			.createFilter(eventManager);
+						chain.toString(samplesPerSecond))))));
 
 		LocalDateTime time = LocalDateTime.of(2017, 5, 30, 12, 0, 6);
 		int second = 0;
 		new File("backup").mkdirs();
-		try (InputStream in = Sample1.class.getResourceAsStream("00000-20170530-120006.dat");
+		try (IFilter filter = filterProvider.createFilter(eventManager);
+			InputStream in = Sample1.class.getResourceAsStream("00000-20170530-120006.dat");
 			OutputStream out = new FileOutputStream(new File("backup/test.dat"))) {
 			byte[] bytes = new byte[bufferLength];
 			byte[] bytes2 = new byte[bufferLength * 2];

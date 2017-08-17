@@ -82,6 +82,12 @@ public class MountainListenerProviderChain implements IMountainListenerProvider
 				spend(x);
 			}
 
+			@Override
+			public void close()
+			{
+				chainListeners.forEach(l -> l.close());
+			}
+
 			private void spend(long x)
 			{
 				while (lastMountain != null && x > lastMountain.x + timeout) {

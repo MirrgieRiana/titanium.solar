@@ -46,7 +46,7 @@ public class MainAnalyzer
 
 		// フィルタ取得
 		EventManager<EventFilterControl> eventManager = new EventManager<>();
-		IFilter filter = ((IFilterProvider) new XStream().fromXML(new File(properties.get("analyzer").getString().get()))).createFilter(eventManager);
+		IFilterProvider filterProvider = (IFilterProvider) new XStream().fromXML(new File(properties.get("analyzer").getString().get()));
 
 		////////////////////////////////////////////////////////////////////
 
@@ -54,36 +54,38 @@ public class MainAnalyzer
 
 		// 対象ファイル列挙
 		Pattern pattern = Pattern.compile("(\\d{5}-(\\d{4})(\\d{2})(\\d{2})-(\\d{2})(\\d{2})(\\d{2}))\\.dat");
-		getFiles(srcDir)
-			.forEach(p -> {
-				File fileIn = p.toFile().getAbsoluteFile();
-				Matcher matcher = pattern.matcher(fileIn.getName());
-				if (matcher.matches()) {
-					String name = matcher.group(1);
-					int year = Integer.parseInt(matcher.group(2), 10);
-					int month = Integer.parseInt(matcher.group(3), 10);
-					int day = Integer.parseInt(matcher.group(4), 10);
-					int hour = Integer.parseInt(matcher.group(5), 10);
-					int minute = Integer.parseInt(matcher.group(6), 10);
-					int second = Integer.parseInt(matcher.group(7), 10);
-					LocalDateTime chunkTime = LocalDateTime.of(year, month, day, hour, minute, second);
+		try (IFilter filter = filterProvider.createFilter(eventManager)) {
+			getFiles(srcDir)
+				.forEach(p -> {
+					File fileIn = p.toFile().getAbsoluteFile();
+					Matcher matcher = pattern.matcher(fileIn.getName());
+					if (matcher.matches()) {
+						String name = matcher.group(1);
+						int year = Integer.parseInt(matcher.group(2), 10);
+						int month = Integer.parseInt(matcher.group(3), 10);
+						int day = Integer.parseInt(matcher.group(4), 10);
+						int hour = Integer.parseInt(matcher.group(5), 10);
+						int minute = Integer.parseInt(matcher.group(6), 10);
+						int second = Integer.parseInt(matcher.group(7), 10);
+						LocalDateTime chunkTime = LocalDateTime.of(year, month, day, hour, minute, second);
 
-					System.out.println("Processing: [" + fileIn + "]");
+						System.out.println("Processing: [" + fileIn + "]");
 
-					File destFile = new File(new File(fileIn.getParentFile(), name + ".csv").toString().replace(srcDir.toString(), destDir.toString()));
-					destFile.getParentFile().mkdirs();
-					try (PrintStream out = new PrintStream(new FileOutputStream(destFile))) {
-						ChainListenerProviderOutput.out = out;
-						eventManager.post(new EventFilterControl.StartChunk(chunkTime));
-						processFile(filter, fileIn);
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
+						File destFile = new File(new File(fileIn.getParentFile(), name + ".csv").toString().replace(srcDir.toString(), destDir.toString()));
+						destFile.getParentFile().mkdirs();
+						try (PrintStream out = new PrintStream(new FileOutputStream(destFile))) {
+							ChainListenerProviderOutput.out = out;
+							eventManager.post(new EventFilterControl.StartChunk(chunkTime));
+							processFile(filter, fileIn);
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						}
+
+					} else {
+						System.out.println("Skipped   : [" + fileIn + "]");
 					}
-
-				} else {
-					System.out.println("Skipped   : [" + fileIn + "]");
-				}
-			});
+				});
+		}
 
 		System.out.println("Finished");
 
