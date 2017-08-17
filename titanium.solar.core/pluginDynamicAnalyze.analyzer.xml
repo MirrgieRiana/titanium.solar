@@ -37,6 +37,7 @@
 							<backlog>10</backlog>
 							<webSocketPort>8081</webSocketPort>
 							<useSynchronizer>false</useSynchronizer>
+							<useDebugSignal>false</useDebugSignal>
 						</titanium.solar.core.recorder.dynamicanalyze.ChainListenerProviderWeb>
 					</chainListenersPrioviders>
 				</titanium.solar.libs.analyze.mountainlisteners.MountainListenerProviderChain>

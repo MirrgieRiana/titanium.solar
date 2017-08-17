@@ -43,6 +43,7 @@ public class ChainListenerProviderWeb implements IChainListenerProvider
 	private int backlog;
 	private int webSocketPort;
 	private boolean useSynchronizer;
+	private boolean useDebugSignal;
 
 	public ChainListenerProviderWeb(
 		double samplesPerSecond,
@@ -50,7 +51,8 @@ public class ChainListenerProviderWeb implements IChainListenerProvider
 		int port,
 		int backlog,
 		int webSocketPort,
-		boolean useSynchronizer)
+		boolean useSynchronizer,
+		boolean useDebugSignal)
 	{
 		this.samplesPerSecond = samplesPerSecond;
 		this.host = host;
@@ -58,6 +60,7 @@ public class ChainListenerProviderWeb implements IChainListenerProvider
 		this.backlog = backlog;
 		this.webSocketPort = webSocketPort;
 		this.useSynchronizer = useSynchronizer;
+		this.useDebugSignal = useDebugSignal;
 	}
 
 	@Override
@@ -150,65 +153,67 @@ public class ChainListenerProviderWeb implements IChainListenerProvider
 
 					httpServer.start();
 					webSocketServer.start();
-					new Thread(new Runnable() {
+					if (useDebugSignal) {
+						new Thread(new Runnable() {
 
-						private double[] v = new double[4];
-						private double[] t = new double[4];
-						private double[] a = new double[4];
+							private double[] v = new double[4];
+							private double[] t = new double[4];
+							private double[] a = new double[4];
 
-						{
-							for (int own_id = 0; own_id < v.length; own_id++) {
-								v[own_id] = Math.random() * 14 + 1;
-								t[own_id] = Math.random() * 45 + 15;
+							{
+								for (int own_id = 0; own_id < v.length; own_id++) {
+									v[own_id] = Math.random() * 14 + 1;
+									t[own_id] = Math.random() * 45 + 15;
+								}
 							}
-						}
 
-						@Override
-						public void run()
-						{
-							while (true) {
-								try {
-									Thread.sleep(HMath.randomBetween(100, 2000));
-								} catch (InterruptedException e1) {
-									break;
+							@Override
+							public void run()
+							{
+								while (true) {
+									try {
+										Thread.sleep(HMath.randomBetween(100, 2000));
+									} catch (InterruptedException e1) {
+										break;
+									}
+
+									int own_id = HMath.randomBetween(0, 3);
+
+									a[own_id] += Math.random() * 3 - 1.5;
+									if (a[own_id] > 2) a[own_id] = 2;
+									if (a[own_id] < -2) a[own_id] = -2;
+
+									v[own_id] += a[own_id] * (Math.random() * 1 + 2);
+									if (v[own_id] > 15) {
+										v[own_id] = 15;
+										a[own_id] = 0;
+									}
+									if (v[own_id] < 1) {
+										v[own_id] = 1;
+										a[own_id] = 0;
+									}
+
+									t[own_id] += a[own_id] * (Math.random() * 1 + 2);
+									if (t[own_id] > 60) {
+										t[own_id] = 60;
+										a[own_id] = 0;
+									}
+									if (t[own_id] < 15) {
+										t[own_id] = 15;
+										a[own_id] = 0;
+									}
+
+									onChain(
+										"00001111111100000000111111110000000011111111",
+										LocalDateTime.now(),
+										Optional.of(new int[] {
+											1, 5, 2, own_id + 2, (int) v[own_id], (int) t[own_id], 0,
+									}));
 								}
-
-								int own_id = HMath.randomBetween(0, 3);
-
-								a[own_id] += Math.random() * 3 - 1.5;
-								if (a[own_id] > 2) a[own_id] = 2;
-								if (a[own_id] < -2) a[own_id] = -2;
-
-								v[own_id] += a[own_id] * (Math.random() * 1 + 2);
-								if (v[own_id] > 15) {
-									v[own_id] = 15;
-									a[own_id] = 0;
-								}
-								if (v[own_id] < 1) {
-									v[own_id] = 1;
-									a[own_id] = 0;
-								}
-
-								t[own_id] += a[own_id] * (Math.random() * 1 + 2);
-								if (t[own_id] > 60) {
-									t[own_id] = 60;
-									a[own_id] = 0;
-								}
-								if (t[own_id] < 15) {
-									t[own_id] = 15;
-									a[own_id] = 0;
-								}
-
-								onChain(
-									"00001111111100000000111111110000000011111111",
-									LocalDateTime.now(),
-									Optional.of(new int[] {
-										1, 5, 2, own_id + 2, (int) v[own_id], (int) t[own_id], 0,
-								}));
 							}
-						}
 
-					}).start();
+						}).start();
+					}
 					System.err.println("HTTP Server Start: " + host + ":" + port);
 					System.err.println("WebSocket Server Start: " + host + ":" + webSocketPort);
 				} catch (Exception e) {
