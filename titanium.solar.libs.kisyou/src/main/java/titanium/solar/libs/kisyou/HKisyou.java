@@ -29,11 +29,11 @@ public class HKisyou
 			+ "<td[^>]*>([^<]*)</td>"
 			+ "</tr>");
 
-	public static URL getURL(Key key) throws MalformedURLException
+	public static URL getURL(String precNo, String blockNo, Key key) throws MalformedURLException
 	{
 		return new URL("http://www.data.jma.go.jp/obd/stats/etrn/view/10min_a1.php"
-			+ "?prec_no=45"
-			+ "&block_no=0382"
+			+ "?prec_no=" + precNo
+			+ "&block_no=" + blockNo
 			+ "&year=" + key.year
 			+ "&month=" + key.month
 			+ "&day=" + key.day
@@ -95,9 +95,9 @@ public class HKisyou
 		return kisyouEntries;
 	}
 
-	public static ArrayList<KisyouEntry> getKisyouEntries(Key key) throws MalformedURLException, IOException
+	public static ArrayList<KisyouEntry> getKisyouEntries(String precNo, String blockNo, Key key) throws MalformedURLException, IOException
 	{
-		try (InputStream in = getURL(key).openStream()) {
+		try (InputStream in = getURL(precNo, blockNo, key).openStream()) {
 			return parse(key, new String(getPageData(in)));
 		}
 	}

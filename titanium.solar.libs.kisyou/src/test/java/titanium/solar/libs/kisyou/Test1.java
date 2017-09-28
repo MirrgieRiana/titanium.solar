@@ -33,7 +33,7 @@ public class Test1
 	@Test
 	public void test1() throws Exception
 	{
-		assertEquals(24 * 6, HKisyou.getKisyouEntries(new Key(2017, 4, 2)).size());
+		assertEquals(24 * 6, HKisyou.getKisyouEntries("45", "0382", new Key(2017, 4, 2)).size());
 	}
 
 	@Test
@@ -44,8 +44,8 @@ public class Test1
 		cacheDirectory.mkdirs();
 		CachedKisyouTable cachedKisyouTable = new CachedKisyouTable(cacheDirectory);
 
-		assertEquals(24 * 6, cachedKisyouTable.getKisyouEntries(new Key(2017, 4, 2)).length());
-		assertEquals(24 * 6, cachedKisyouTable.getKisyouEntries(new Key(2017, 4, 2)).length());
+		assertEquals(24 * 6, cachedKisyouTable.getKisyouEntries("45", "0382", new Key(2017, 4, 2)).length());
+		assertEquals(24 * 6, cachedKisyouTable.getKisyouEntries("45", "0382", new Key(2017, 4, 2)).length());
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class Test1
 
 		BiConsumer<LocalDateTime, LocalDateTime> f1 = (a, b) -> {
 			try {
-				assertEquals(a, cachedKisyouTable.getKisyouEntry(b).time);
+				assertEquals(a, cachedKisyouTable.getKisyouEntry("45", "0382", b).time);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

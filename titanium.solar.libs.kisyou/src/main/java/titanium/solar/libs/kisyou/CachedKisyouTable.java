@@ -23,41 +23,41 @@ public class CachedKisyouTable
 		this.cacheDirectory = cacheDirectory;
 	}
 
-	public ImmutableArray<KisyouEntry> getKisyouEntries(Key key) throws IOException
+	public ImmutableArray<KisyouEntry> getKisyouEntries(String precNo, String blockNo, Key key) throws IOException
 	{
 		ImmutableArray<KisyouEntry> kisyouEntries = table.get(key);
 		if (kisyouEntries == null) {
-			kisyouEntries = getKisyouEntries2(key);
+			kisyouEntries = getKisyouEntries2(precNo, blockNo, key);
 			table.put(key, kisyouEntries);
 		}
 		return kisyouEntries;
 	}
 
-	protected String getCacheFileName(Key key)
+	protected String getCacheFileName(String precNo, String blockNo, Key key)
 	{
-		return key + ".html";
+		return precNo + "-" + blockNo + "-" + key + ".html";
 	}
 
-	public File getCacheFile(Key key)
+	public File getCacheFile(String precNo, String blockNo, Key key)
 	{
-		return new File(cacheDirectory, getCacheFileName(key));
+		return new File(cacheDirectory, getCacheFileName(precNo, blockNo, key));
 	}
 
-	protected ImmutableArray<KisyouEntry> getKisyouEntries2(Key key) throws IOException
+	protected ImmutableArray<KisyouEntry> getKisyouEntries2(String precNo, String blockNo, Key key) throws IOException
 	{
-		return new ImmutableArray<>(HKisyou.parse(key, new String(getPageData(key))));
+		return new ImmutableArray<>(HKisyou.parse(key, new String(getPageData(precNo, blockNo, key))));
 	}
 
-	protected byte[] getPageData(Key key) throws IOException
+	protected byte[] getPageData(String precNo, String blockNo, Key key) throws IOException
 	{
-		File cacheFile = getCacheFile(key);
+		File cacheFile = getCacheFile(precNo, blockNo, key);
 		if (cacheFile.isFile()) {
 			try (InputStream in = new FileInputStream(cacheFile)) {
 				return HKisyou.getPageData(in);
 			}
 		} else {
 			byte[] pageData;
-			try (InputStream in = HKisyou.getURL(key).openStream()) {
+			try (InputStream in = HKisyou.getURL(precNo, blockNo, key).openStream()) {
 				pageData = HKisyou.getPageData(in);
 			}
 			try (OutputStream out = new FileOutputStream(cacheFile)) {
@@ -67,9 +67,9 @@ public class CachedKisyouTable
 		}
 	}
 
-	public KisyouEntry getKisyouEntry(LocalDateTime time) throws IOException
+	public KisyouEntry getKisyouEntry(String precNo, String blockNo, LocalDateTime time) throws IOException
 	{
-		ImmutableArray<KisyouEntry> kisyouEntries = getKisyouEntries(new Key(time));
+		ImmutableArray<KisyouEntry> kisyouEntries = getKisyouEntries(precNo, blockNo, new Key(time));
 		for (int i = kisyouEntries.length() - 1; i >= 0; i--) {
 			KisyouEntry kisyouEntry = kisyouEntries.get(i);
 			if (kisyouEntry.time.compareTo(time) <= 0) {
