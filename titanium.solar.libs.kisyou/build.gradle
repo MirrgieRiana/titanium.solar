@@ -4,7 +4,7 @@ apply plugin: 'maven'
 
 project.group = 'titanium.solar'
 project.archivesBaseName = 'titanium.solar.libs.kisyou'
-version = '0.1.1'
+version = '0.1.2'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -76,6 +76,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.+'
 
 	compile group: 'mirrg.lithium', name: 'mirrg.lithium.struct', version: '2.2.+'
+	compile group: 'mirrg.lithium', name: 'mirrg.lithium.lang', version: '1.1.+'
 }
 
 uploadArchives {

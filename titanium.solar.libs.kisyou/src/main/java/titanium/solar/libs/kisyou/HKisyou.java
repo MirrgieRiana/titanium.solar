@@ -11,6 +11,7 @@ import java.util.OptionalInt;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import mirrg.lithium.lang.HOptional;
 import mirrg.lithium.struct.Tuple;
 
 public class HKisyou
@@ -71,29 +72,13 @@ public class HKisyou
 		while (matcher.find()) {
 			int hour = Integer.parseInt(matcher.group(1), 10);
 			int minute = Integer.parseInt(matcher.group(2), 10);
-			OptionalDouble kousui = matcher.group(3).equals("///")
-				? OptionalDouble.empty()
-				: OptionalDouble.of(Double.parseDouble(matcher.group(3)));
-			OptionalDouble temperature = matcher.group(4).equals("///")
-				? OptionalDouble.empty()
-				: OptionalDouble.of(Double.parseDouble(matcher.group(4)));
-			OptionalDouble averageHuusoku = matcher.group(5).equals("///")
-				? OptionalDouble.empty()
-				: OptionalDouble.of(Double.parseDouble(matcher.group(5)));
-			Optional<String> averageKazamuki = matcher.group(6).equals("///")
-				? Optional.empty()
-				: Optional.of(matcher.group(6));
-			OptionalDouble maxHusoku = matcher.group(7).equals("///")
-				? OptionalDouble.empty()
-				: OptionalDouble.of(Double.parseDouble(matcher.group(7)));
-			Optional<String> maxKazamuki = matcher.group(8).equals("///")
-				? Optional.empty()
-				: Optional.of(matcher.group(8));
-			OptionalInt nissyou = matcher.group(9).isEmpty()
-				? OptionalInt.empty()
-				: matcher.group(9).equals("///")
-					? OptionalInt.empty()
-					: OptionalInt.of(Integer.parseInt(matcher.group(9), 10));
+			OptionalDouble kousui = HOptional.parseDouble(matcher.group(3));
+			OptionalDouble temperature = HOptional.parseDouble(matcher.group(4));
+			OptionalDouble averageHuusoku = HOptional.parseDouble(matcher.group(5));
+			Optional<String> averageKazamuki = Optional.of(matcher.group(6));
+			OptionalDouble maxHusoku = HOptional.parseDouble(matcher.group(7));
+			Optional<String> maxKazamuki = Optional.of(matcher.group(8));
+			OptionalInt nissyou = HOptional.parseInt(matcher.group(9), 10);
 
 			kisyouEntries.add(new KisyouEntry(
 				hour,
