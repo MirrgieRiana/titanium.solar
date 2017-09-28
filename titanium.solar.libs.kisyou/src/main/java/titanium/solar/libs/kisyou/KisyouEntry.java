@@ -1,6 +1,8 @@
 package titanium.solar.libs.kisyou;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 public class KisyouEntry
@@ -9,24 +11,24 @@ public class KisyouEntry
 	public final int hour;
 	public final int minute;
 	public final LocalDateTime time;
-	public final double kousui;
-	public final double temperature;
-	public final double averageHuusoku;
-	public final String averageKazamuki;
-	public final double maxHusoku;
-	public final String maxKazamuki;
+	public final OptionalDouble kousui;
+	public final OptionalDouble temperature;
+	public final OptionalDouble averageHuusoku;
+	public final Optional<String> averageKazamuki;
+	public final OptionalDouble maxHusoku;
+	public final Optional<String> maxKazamuki;
 	public final OptionalInt nissyou;
 
 	public KisyouEntry(
 		int hour,
 		int minute,
 		LocalDateTime time,
-		double kousui,
-		double temperature,
-		double averageHuusoku,
-		String averageKazamuki,
-		double maxHusoku,
-		String maxKazamuki,
+		OptionalDouble kousui,
+		OptionalDouble temperature,
+		OptionalDouble averageHuusoku,
+		Optional<String> averageKazamuki,
+		OptionalDouble maxHusoku,
+		Optional<String> maxKazamuki,
 		OptionalInt nissyou)
 	{
 		this.hour = hour;
@@ -46,9 +48,9 @@ public class KisyouEntry
 	{
 		return String.format("%s,%s,%s,%s",
 			time,
-			kousui,
-			temperature,
-			nissyou.orElse(-1));
+			kousui.isPresent() ? kousui : "null",
+			temperature.isPresent() ? temperature : "null",
+			nissyou.isPresent() ? nissyou : "null");
 	}
 
 }
